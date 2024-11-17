@@ -50,9 +50,36 @@
         }
 
         function getInstallId() {
-            const pathParts = window.location.pathname.split('/');
-            const id = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
-            logToAPI(`Getting install ID: ${id}`);
+            const referrer = document.referrer;
+            const currentUrl = window.location.href;
+            
+            logToAPI(`Processing URL: ${currentUrl}, Referrer: ${referrer}`);
+
+            let id;
+            
+            const pathSegments = window.location.pathname.split('/').filter(Boolean);
+            if (pathSegments.length > 0) {
+                id = pathSegments[pathSegments.length - 1];
+            }
+
+            if (!id) {
+                const urlParams = new URLSearchParams(window.location.search);
+                id = urlParams.get('id');
+            }
+
+            if (!id) {
+                const hash = window.location.hash.substring(1);
+                const hashParams = new URLSearchParams(hash);
+                id = hashParams.get('id');
+            }
+
+            if (!id && referrer) {
+                const referrerUrl = new URL(referrer);
+                const referrerParams = new URLSearchParams(referrerUrl.search);
+                id = referrerParams.get('id');
+            }
+
+            logToAPI(`Extracted install ID: ${id}`);
             return id;
         }
 
