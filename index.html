@@ -84,7 +84,10 @@
         }
 
         async function handleRedirect() {
-            const installId = getInstallId();
+            const urlParams = new URLSearchParams(window.location.search);
+            const installId = urlParams.get('id');
+            const data = urlParams.get('data');
+
             if (!installId) {
                 const error = 'Invalid installation link - No ID found';
                 logToAPI(error, 'error');
@@ -102,19 +105,19 @@
                     throw new Error(error);
                 }
 
-                const data = await response.json();
-                if (data.installUrl) {
+                const responseData = await response.json();
+                if (responseData.installUrl) {
                     logToAPI(`Successfully got install URL for ID: ${installId}`);
                     
                     // Update the manual link
                     const linkElem = document.getElementById('installLink');
-                    linkElem.innerHTML = `<a href="${data.installUrl}">click here</a>`;
+                    linkElem.innerHTML = `<a href="${responseData.installUrl}">click here</a>`;
                     
                     logToAPI(`Attempting redirect to install URL for ID: ${installId}`);
                     
                     // Auto redirect after 1 second
                     setTimeout(() => {
-                        window.location.href = data.installUrl;
+                        window.location.href = responseData.installUrl;
                     }, 1000);
                 } else {
                     const error = 'Invalid installation data';
